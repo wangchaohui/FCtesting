@@ -12,11 +12,11 @@ param(
 ..\PsExec.exe \\$fcname  -i 1 -w C:\LinuxAgentPS -u $username -p $password cmd /c copy /Y C:\LinuxAgentPS\SvdGenerator.exe c:\fc
 dir fctesting.ps1
 net use \\$fcname /user:$username  $password 
-copy /Y fctesting.ps1 \\$fcname\c$\LinuxAgentPS
-copy /Y %WALA% \\$fcname\c$\LinuxAgentPS\jenkins_waagent
+copy fctesting.ps1 \\$fcname\c$\LinuxAgentPS
+copy %WALA% \\$fcname\c$\LinuxAgentPS\jenkins_waagent
 $time = Get-date -Format yyyy-MM-dd-HH-mm-ss
 $logDir = "log_$time"
-echo >start_fctesting.cmd powershell -file c:\linuxAgentPS\fctesting.ps1 $logDir $fcArgs
+"powershell -file c:\linuxAgentPS\fctesting.ps1 $logDir $fcArgs" >start_fctesting.cmd
 ..\PsExec.exe \\$fcname  -i 1 -w C:\DeploymentScripts_FC123_withPdu -u $username -p $password -cf start_fctesting.cmd 
 
 Remove-Item *.log
