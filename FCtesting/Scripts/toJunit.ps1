@@ -1,29 +1,19 @@
-﻿
-$filename = $args[0]
-$resultfile = $args[1]
-$casename = $args[2]
-if(-not $filename)
-{
-   Write-Host "toJunit.ps1 fcresultinputfile resultoutputfile TestSuitname"
-   exit 0
-}
-if(-not $resultfile)
-{
-  $casename="result.xml"
-}
+﻿Param(
+  [Parameter(Mandatory=$True)]
+  [string]$filename,
+  [string]$resultfile="result.xml",
+  [string]$casename="FCtesting"
+)
 
-if(-not $casename)
-{
-  $casename="FCtesting"
-}
+Write-Host "toJunit.ps1 $filename $resultfile $casename"
 
- Write-Host "toJunit.ps1 $filename $resultfile $casename"
-
-Function Write-JunitXml([System.Collections.ArrayList] $Results, [System.Collections.HashTable] $HeaderData, [System.Collections.HashTable] $Statistics, $ResultFilePath)
+Function Write-JunitXml([System.Collections.ArrayList] $Results,
+                        [System.Collections.HashTable] $HeaderData,
+                        [System.Collections.HashTable] $Statistics, $ResultFilePath)
 {
 $template = @'
 <testsuite name="" file="">
-<testcase classname="" name="" time="">
+<testcase classname="" isoname="" name="" time="">
     <failure type=""></failure>
 </testcase>
 </testsuite>
@@ -46,7 +36,8 @@ $template = @'
     foreach($result in $Results) 
     {   
         $newTestCase = $newTestCaseTemplate.clone()
-        $newTestCase.classname = $result.classname.ToString()
+        $newTestCase.classname = $result.classname.ToString()+"."+($result.isoname -split "\.")[0]
+        $newTestCase.isoname = $result.isoname.ToString()
         $newTestCase.name = $result.Test.ToString()
         $newTestCase.time = $result.Time.ToString()
         if($result.Result -match "PASS")
@@ -92,23 +83,30 @@ $lines|%{
       $results+=@{Test= $($Matches[1]);Time=-1;Result=$($Matches[2]);className=$tenant;};
    }
 }
-
 [Array]$results=$();
 
-Get-Content $args[0]|%{
+Get-Content $filename|%{
    if($_ -match '.*TenantName=(.*)')
    {
       $tenant=$Matches[1];    
    }
+   if($_ -match '.*ISOBlobName=(.*)')
+   {
+      $isoname=$Matches[1];    
+   }
    if($_ -match 'TESTCASE (.*) - (.*)')
    {
       echo "$($Matches[1]) $($Matches[2]) $tenant"
-      $results+=@{Test= $($Matches[1]);Time=-1;Result=$($Matches[2]);className=$tenant;};
+      $results+=@{Test= $($Matches[1]);Time=-1;Result=$($Matches[2]);className=$tenant;isoname=$isoname;};
    }
-
+   if($_ -match '(.*) is (PASS|FAIL)')
+   {
+      echo "$($Matches[1]) $($Matches[2]) $tenant"
+      $results+=@{Test= $($Matches[1]);Time=-1;Result=$($Matches[2]);className=$tenant;isoname=$isoname;};
+   }
 }
 
-$HeaderData=@{className=$casename}
+$HeaderData=@{className=$casename; isoname=$isoname}
 Write-JunitXml -Results $results -HeaderData $HeaderData -ResultFilePath $resultfile
 
 

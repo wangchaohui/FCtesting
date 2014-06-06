@@ -1,11 +1,11 @@
-﻿$linuxagentpath=$args[0]
-$distroes=$args[1]
-$password=$args[2]
-$tests = $args[3]
-if(-not $tests)
-{
+﻿param(
+  $logDir,
+  $linuxagentpath,
+  $distroes,
+  $password,
   $tests="linux_Certs_page.iso,PositiveTests"
-}
+)
+
  write-host "linuxagentpath  $linuxagentpath distro $distro "
 cd C:\DeploymentScripts_FC123_withPdu
 
@@ -49,9 +49,5 @@ $testContent+= "$distro,$test,"+$distro.replace(".","")+"`r`n"
 
 Set-Content -Value "OSBlobName,ISOBlobName,TestName,TenantName`r`n$testContent" .\temp_data.csv
 
-.\RunTestsWithCSV.ps1 .\temp_data.csv 
+.\RunTestsWithCSV.ps1 $logDir .\temp_data.csv 
 
-$results=dir $linuxagentpath\log |Sort-Object -Property LastWriteTime -Descending
-$results=($results[0],$results[1])|Sort-Object -Property Length
-cp -force $results[0].fullname $linuxagentpath\log\summary.log
-cp -force $results[1].fullname $linuxagentpath\log\test.log
