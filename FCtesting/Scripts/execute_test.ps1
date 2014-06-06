@@ -22,4 +22,4 @@ echo "powershell -file c:\linuxAgentPS\fctesting.ps1 $logDir $fcArgs" | Out-File
 ..\PsExec.exe \\$fcname  -i 1 -w C:\DeploymentScripts_FC123_withPdu -u $username -p $password -cf start_fctesting.cmd 
 
 Remove-Item *.log
-Copy-Item -Path \\$fcname\c$\LinuxAgentPS\lOG\$logDir\* -Filter *.log -Destination . –Recurse
+Copy-Item -Path \\$fcname\c$\LinuxAgentPS\lOG\$logDir\* -Filter *.log -Destination . -Recurse
