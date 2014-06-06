@@ -49,5 +49,6 @@ $testContent+= "$distro,$test,"+$distro.replace(".","")+"`r`n"
 
 Set-Content -Value "OSBlobName,ISOBlobName,TestName,TenantName`r`n$testContent" .\temp_data.csv
 
+Write-Host "logDir=$logDir"
 .\RunTestsWithCSV.ps1 $logDir .\temp_data.csv 
 
