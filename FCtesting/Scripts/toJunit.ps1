@@ -105,8 +105,10 @@ Get-Content $filename|%{
       $results+=@{Test= $($Matches[1]);Time=-1;Result=$($Matches[2]);className=$tenant;isoname=$isoname;};
    }
 }
-
-$HeaderData=@{className=$casename; isoname=$isoname}
-Write-JunitXml -Results $results -HeaderData $HeaderData -ResultFilePath $resultfile
+if ($results.count -gt 0)
+{
+  $HeaderData=@{className=$casename; isoname=$isoname}
+  Write-JunitXml -Results $results -HeaderData $HeaderData -ResultFilePath $resultfile
+}
 
 
